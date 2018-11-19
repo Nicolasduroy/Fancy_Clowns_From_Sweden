@@ -69,27 +69,27 @@ local
    fun {FixDuration FixedDuration Partition}
       D
       %returns the duration in seconds of Partition.
-      fun {Duration Partition}	 
+      fun {Duration Partition Acc}	 
 	 case Partition of Elem|T then
 	    case Elem of silence(duration:D) then
-	       D+{Duration T}
+	       {Duration T Acc+D}
 	    [] note(name:N octave:O sharp:S duration:D instrument:I) then
-	       D+{Duration T}
+	       {Duration T Acc+D}
 	    [] H|Tail then
 	       case H of silence(duration:D) then
-	          D+{Duration T}
+	          {Duration T Acc+D}
 	       [] note(name:N octave:O sharp:S duration:D instrument:I) then
-	          D+{Duration T}
+	          {Duration T Acc+D}
 	       end
 	    else
-	       {Duration T}
+	       {Duration T Acc}
 	    end
 	 else
 	    0.0
 	 end
       end
    in
-      D = {Duration Partition}
+      D = {Duration Partition 0.0}
       if D \= FixedDuration then
 	 {Stretch FixedDuration/D Partition}
       else
