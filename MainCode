@@ -1,0 +1,293 @@
+local
+   % See project statement for API details.
+   [Project] = {Link ['Project2018.ozf']}
+   Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   % Translate a note to the extended notation.
+   fun {NoteToExtended Note}
+      case Note
+      of Name#Octave then
+         note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
+      [] Atom then
+         case {AtomToString Atom}
+         of [_] then
+            note(name:Atom octave:4 sharp:false duration:1.0 instrument:none)
+         [] [N O] then
+            note(name:{StringToAtom [N]}
+                 octave:{StringToInt [O]}
+                 sharp:false
+                 duration:1.0
+                 instrument: none)
+         end
+      end
+   end
+
+   %Translate a chord to the extended notation.
+   fun{ChordToExtended Chord}
+      case Chord of H|T then
+	 {NoteToExtended H}|{ChordToExtended T}
+      else
+	 nil
+      end
+   end
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   %Stretch the duration of all notes and silences in Chord by Factor
+   fun{StretchChord Factor Chord}
+      case Chord of H|T then
+	 case H of silence(duration:D) then
+	    silence(duration:D*Factor)|{StretchChord Factor T}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    note(name:N octave:O sharp:S duration:D*Factor instrument:I)|{StretchChord Factor T}
+	 end
+      else
+	 nil
+      end
+   end
+
+   %Stretch the duration of all notes, silences and chords in Part by Factor
+   fun{Stretch Factor Part}
+      case Part of Elem|T then	 
+	 case Elem of silence(duration:D) then
+	    silence(duration:D*Factor)|{Stretch Factor T}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    note(name:N octave:O sharp:S duration:D*Factor instrument:I)|{Stretch Factor T}   
+	 [] H|Tail then
+	    {StretchChord Factor Elem}|{Stretch Factor T}
+	 else
+	    {Stretch Factor T}
+	 end
+      else
+	 nil
+      end
+   end
+      
+   %Fix the duration of Partition to FixedDuration
+   fun {FixDuration FixedDuration Partition}
+      D
+      %returns the duration in seconds of Partition.
+      fun {Duration Partition}	 
+	 case Partition of Elem|T then
+	    case Elem of silence(duration:D) then
+	       D+{Duration T}
+	    [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	       D+{Duration T}
+	    [] H|Tail then
+	       case H of silence(duration:D) then
+	          D+{Duration T}
+	       [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	          D+{Duration T}
+	       end
+	    else
+	       {Duration T}
+	    end
+	 else
+	    0.0
+	 end
+      end
+   in
+      D = {Duration Partition}
+      if D \= FixedDuration then
+	 {Stretch FixedDuration/D Partition}
+      else
+	 Partition
+      end
+   end
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   %Returns a list with a Amount of times Sound
+   fun  {Drone Sound Amount}
+      if Amount == 0 then nil
+      else
+	 Sound|{Drone Sound Amount-1}
+      end
+   end
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   %Increse of one semitone every notes/chords of Partition.
+   fun {TransposeUp Partition}
+      case Partition of Elem|T then
+         case Elem of note(name:Name octave:O sharp:S duration:D instrument:I) then	 
+	    case Name of a then
+	       if S then  
+	          note(name:b octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	       else
+	          note(name:a octave:O sharp:true duration:D instrument:I)|{TransposeUp T}
+	       end
+	    [] b then
+	       note(name:c octave:O+1 sharp:false duration:D instrument:I)|{TransposeUp T}
+	    [] c then
+	       if S then  
+	          note(name:d octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	       else
+	          note(name:c octave:O sharp:true duration:D instrument:I)|{TransposeUp T}
+	       end
+	    [] d then
+	       if S then  
+	          note(name:e octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	       else
+	          note(name:d octave:O sharp:true duration:D instrument:I)|{TransposeUp T}
+	       end
+	    [] e then
+	       note(name:f octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	    [] f then
+	       if S then  
+	          note(name:g octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	       else
+	          note(name:f octave:O sharp:true duration:D instrument:I)|{TransposeUp T}
+	       end
+	    [] g then
+	       if S then  
+	          note(name:a octave:O sharp:false duration:D instrument:I)|{TransposeUp T}
+	       else
+	          note(name:g octave:O sharp:true duration:D instrument:I)|{TransposeUp T}
+	       end
+	    end
+         [] H|Tail then
+	    {TransposeUp Elem}|{TransposeUp T}
+         else
+	    {TransposeUp T}
+         end
+      else
+         nil
+      end
+   end
+
+   %Decrease of one semitone every notes/chords in Partition.
+   fun {TransposeDown Partition}
+      case Partition of Elem|T then
+         case Elem of note(name:Name octave:O sharp:S duration:D instrument:I) then	 
+	    case Name of a then
+	       if S then  
+	          note(name:a octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       else
+	          note(name:g octave:O sharp:true duration:D instrument:I)|{TransposeDown T}
+	       end
+	    [] b then
+	       note(name:a octave:O sharp:true duration:D instrument:I)|{TransposeDown T}
+	    [] c then
+	       if S then  
+	          note(name:c octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       else
+	          note(name:b octave:O-1 sharp:false duration:D instrument:I)|{TransposeDown T}
+	       end
+	    [] d then
+	       if S then  
+	          note(name:d octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       else
+	          note(name:c octave:O sharp:true duration:D instrument:I)|{TransposeDown T}
+	       end
+	    [] e then
+	       note(name:d octave:O sharp:true duration:D instrument:I)|{TransposeDown T}
+	    [] f then
+	       if S then  
+	          note(name:f octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       else
+	          note(name:e octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       end
+	    [] g then
+	       if S then  
+	          note(name:g octave:O sharp:false duration:D instrument:I)|{TransposeDown T}
+	       else
+	          note(name:f octave:O sharp:true duration:D instrument:I)|{TransposeDown T}
+	       end
+	    end
+         [] H|Tail then
+	    {TransposeDown Elem}|{TransposeDown T}
+         else
+	    {TransposeDown T}
+         end
+      else
+         nil
+      end
+   end
+
+   %Change all notes and chords of Partition by the number of Semitones
+   fun{Transpose Semitones Partition}
+      if Semitones == 0 then
+	 Partition
+      elseif Semitones > 0 then
+	 {Transpose Semitones-1 {TransposeUp Partition}}
+      else
+	 {Transpose Semitones+1 {TransposeDown Partition}}
+      end
+   end
+   
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+   fun {PartitionToTimedList Partition}
+      case Partition of Elem|T then
+	 case Elem of H|Tail then
+	    case H of Atom then
+	       {ChordToExtended Elem}|{PartitionToTimedList T}
+	    [] Name#Octave then
+	       {ChordToExtended Elem}|{PartitionToTimedList T}
+	    else
+	       Elem|{PartitionToTimedList T}
+	    end
+	 [] Name#Octave then
+	    {NoteToExtended Elem}|{PartitionToTimedList T}
+	 [] silence(duration:D) then
+	    Elem|{PartitionToTimedList T}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    Elem|{PartitionToTimedList T}
+	 [] duration(seconds:Sec Part) then
+	    {Append {FixDuration Sec {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	 [] stretch(factor:Factor Part) then
+	    {Append {Stretch Factor {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	 [] drone(note:Sound amount:Amount)then
+	    case Sound of H|Tail then
+	       {Append {Drone {ChordToExtended Sound} Amount} {PartitionToTimedList T}}
+	    else
+	       {Append {Drone {NoteToExtended Sound}Amount} {PartitionToTimedList T}}
+	    end
+	 [] transpose(semitones:Semitones Part) then
+	    {Append {Transpose Semitones {PartitionToTimedList Part}} {PartitionToTimedList T}} 
+	 [] Atom then
+	     {NoteToExtended Elem}|{PartitionToTimedList T}
+	 else 
+	    Elem|{PartitionToTimedList T}
+	 end
+	 else
+	 nil
+      end
+   end
+  
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun {Mix P2T Music}
+      % TODO
+      {Project.readFile 'wave/animaux/cow.wav'}
+   end
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   Music = {Project.load 'joy.dj.oz'}
+   Start
+
+   % Uncomment next line to insert your tests.
+   % \insert 'tests.oz'
+   % !!! Remove this before submitting.
+in
+   Start = {Time}
+
+   % Uncomment next line to run your tests.
+   % {Test Mix PartitionToTimedList}
+
+   % Add variables to this list to avoid "local variable used only once"
+   % warnings.
+   {ForAll [NoteToExtended Music] Wait}
+   
+   % Calls your code, prints the result and outputs the result to `out.wav`.
+   % You don't need to modify this.
+   {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
+   
+   % Shows the total time to run your code.
+   {Browse {IntToFloat {Time}-Start} / 1000.0}
+end
