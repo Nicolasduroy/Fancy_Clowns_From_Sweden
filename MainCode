@@ -85,7 +85,7 @@ local
 	       {Duration T Acc}
 	    end
 	 else
-	    0.0
+	    Acc
 	 end
       end
    in
