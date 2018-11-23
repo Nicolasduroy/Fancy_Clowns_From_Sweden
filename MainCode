@@ -109,201 +109,32 @@ local
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   fun {Transpose Semitone Partition}
-     local Notes DeltaO Sharp Indice Semitones in
+     local Notes SharpNotes NumNotes CurrNum in
         case Partition of Elem|T then
-            Notes = notes(1:c 2:c 3:d 4:d 5:e 6:f 7:f 8:g 9:g 10:a 11:a 12:b)
-	    DeltaO = (Semitone div 12)
-	    Semitones = Semitone-12*DeltaO
-            case Elem of note(name:Name octave:O sharp:S duration:D instrument:I) then
-	        case Name of a then
-	            if S then
-	               if 11+Semitones > 12 then
-		          Indice = (11+Semitones)-12
-		          Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		          note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	               elseif 11+Semitones < 1 then
-		          Indice = 12+11+Semitones
-                          Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                          note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-                       else
-                          Indice = 11+Semitones
-                          Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                          note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-                       end
-                    else
-	               if 10+Semitones > 12 then
-		          Indice = (10+Semitones)-12
-		          Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		          note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-                       elseif 10+Semitones < 1 then
-                          Indice = 12+10+Semitones
-                          Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                          note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-                       else
-                          Indice = 10+Semitones
-                          Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                          note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	               end
-	            end
-	        [] b then
-	    if 12+Semitones > 12 then
-		  Indice = (12+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 12+Semitones < 1 then
-                  Indice = 12+12+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 12+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	 [] c then
-	    if S then
-	       if 2+Semitones > 12 then
-		  Indice = (2+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       elseif 2+Semitones < 1 then
-		  Indice = 12+2+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 2+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               end
-            else
-	       if 1+Semitones > 12 then
-		  Indice = (1+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 1+Semitones < 1 then
-                  Indice = 12+1+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 1+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	    end
-	    [] d then
-	       if S then
-	       if 4+Semitones > 12 then
-		  Indice = (4+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       elseif 4+Semitones < 1 then
-		  Indice = 12+4+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 4+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               end
-            else
-	       if 3+Semitones > 12 then
-		  Indice = (3+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 3+Semitones < 1 then
-                  Indice = 12+3+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 3+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	    end
-	    [] e then
-	        if 5+Semitones > 12 then
-		  Indice = (5+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 5+Semitones < 1 then
-                  Indice = 12+5+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 5+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	 [] f then
-	     if S then
-	       if 7+Semitones > 12 then
-		  Indice = (7+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       elseif 7+Semitones < 1 then
-		  Indice = 12+7+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 7+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               end
-            else
-	       if 6+Semitones > 12 then
-		  Indice = (6+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 6+Semitones < 1 then
-                  Indice = 12+6+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 6+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	    end
-	 [] g then
-	     if S then
-	       if 9+Semitones > 12 then
-		  Indice = (9+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       elseif 9+Semitones < 1 then
-		  Indice = 12+9+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 9+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               end
-            else
-	       if 8+Semitones > 12 then
-		  Indice = (8+Semitones)-12
-		  Sharp = (Indice == 2) orelse (Indice == 4) orelse (Indice == 7) orelse (Indice == 9) orelse (Indice == 11)
-		  note(name:(Notes.Indice) octave:O+1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               elseif 8+Semitones < 1 then
-                  Indice = 12+8+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O-1+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-               else
-                  Indice = 8+Semitones
-                  Sharp = Indice == 2 orelse Indice == 4 orelse Indice == 7 orelse Indice == 9 orelse Indice == 11
-                  note(name:(Notes.Indice) octave:O+DeltaO sharp:Sharp duration:D instrument:I)|{Transpose Semitone T}
-	       end
-	     end
-	 end
-      [] H|Tail then
-	 {Transpose Semitone Elem}|{Transpose Semitone T}
-      else
-	 {Transpose Semitone T}
-      end
-     else
-	nil
+	   Notes = notes(c:0 d:2 e:4 f:5 g:7 a:9 b:11)
+	   SharpNotes = sharpnotes(c:1 d:3 f:6 g:8 a:10)
+	   NumNotes = numnotes(0:c#false 1:c#true 2:d#false 3:d#true 4:e#false 5:f#false 6:f#true 7:g#false 8:g#true 9:a#false 10:a#true 11:b#false)
+	   case Elem of note(name:Name octave:O sharp:S duration:D instrument:I) then
+	      if S then
+	         CurrNum = O*12 + SharpNotes.Name
+	      else
+	         CurrNum = O*12 + Notes.Name
+	      end
+	      case NumNotes.(CurrNum + Semitone mod 12) of N#B then
+	         note(name:N octave:(CurrNum + Semitone div 12) sharp:B duration:D instrument:I)|{Transpose Semitone T}
+	      else
+	        {Transpose Semitone T}
+	      end
+	   [] H|Tail then
+	      {Transpose Semitone Elem}|{Transpose Semitone T}
+	   else
+	      {Transpose Semitone T}
+	   end
+        else
+	   nil
+        end
      end
-   end
-end
+  end
    
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
