@@ -10,6 +10,8 @@ local
       case Note
       of Name#Octave then
          note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
+      [] silence then
+         silence(duration:1.0)
       [] Atom then
          case {AtomToString Atom}
          of [_] then
