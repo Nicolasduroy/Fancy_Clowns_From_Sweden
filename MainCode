@@ -237,16 +237,66 @@ local
    end
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun{Repeat Amount Music}
+      if Amount == 1 then
+	 Music
+      else
+	 {Append Music {Repeat Amount-1 Music}}
+      end
+   end
+
+   fun{Loop Duration Music}
+      local Time Number Rest in
+	 Time = {List.Length Music}/44100
+	 Number = Time div Duration
+	 Rest = Time mod Duration
+	 {Append {Repeat Number Music} {Cut 0 Rest Music}}
+      end
+   end
+
+   fun{Cut Start Stop Music}
+      fun {CutAux Start Stop Acc Music}
+	 if Acc =< Stop*44100.0 then
+	    case Music of H|T then
+	       if Acc =< Start*44100.0 then
+		  {CutAux Start Stop Acc+1.0 T}
+	       else
+		  H|{CutAux Start Stop Acc+1.0 T}
+	       end
+	    else
+	       0.0|{CutAux Start Stop Acc+1.0 nil}
+	    end
+	 else
+	    nil
+	 end
+      end
+   in
+      {CutAux Start Stop 0.0 Music}
+   end
    
+   
+
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    fun {Mix P2T Music}
       case Music of Elem|T then
 	 case Elem of partition(Partition) then
-	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}
+	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
+	 [] repeat(amount:Amount Mus) then
+	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
+	 [] loop(duration:Duration Mus) then
+	    {Append {Loop Duration {Mix P2T Mus}} {Mix P2T T}}
+	 [] cut(start:Start finish:Stop Mus) then
+	    {Append {Cut Start Stop {Mix P2T Mus}} {Mix P2T T}}
 	 else
 	    {Mix PartitionToTimedList T}
 	 end
+      else
+	 nil
       end
    end
+
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    Music = {Project.load 'joy.dj.oz'}
