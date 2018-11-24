@@ -251,7 +251,7 @@ local
 	 Time = {List.Length Music}/44100
 	 Number = Time div Duration
 	 Rest = Time mod Duration
-	 {Append {Repeat Number Music} {Cut 0 Rest Music}}
+	 {Append {Repeat Number Music} {Cut 0 Rest Music}} %Si le duration est plus petit que la music, on a une boucle infinie. 
       end
    end
 
@@ -265,7 +265,7 @@ local
 		  H|{CutAux Start Stop Acc+1.0 T}
 	       end
 	    else
-	       0.0|{CutAux Start Stop Acc+1.0 nil}
+	       0.0|{CutAux Start Stop Acc+1.0 nil} %Pourqoui zero?
 	    end
 	 else
 	    nil
