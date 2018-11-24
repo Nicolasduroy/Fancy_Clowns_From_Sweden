@@ -225,7 +225,7 @@ local
    fun {PartitionToSamples Partition}
       case Partition of  Elem|T then
 	 case Elem of silence(duration:D) then
-	    {Append {NoteToSamples 0 44100.0*D 1.0} {PartitionToSamples T}}
+	    {Append {NoteToSamples 0 44100.0*D 1.0} {PartitionToSamples T}} %Creer une fonction appart pour silence? Calcule non necessaire
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
 	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
 	 [] H|Tail then
