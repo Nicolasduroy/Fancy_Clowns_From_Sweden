@@ -183,7 +183,7 @@ local
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    Pi = 3.14159265359
    fun{ChordToSamples F A Acc1 Acc2}
-      if Acc1 > A then
+      if Acc1 >= A then
 	 nil
       else
 	 case F of H|T then
@@ -195,7 +195,7 @@ local
    end
    
    fun{NoteToSamples F A I}
-      if I > A then
+      if I >= A then
 	 nil
       else
 	 {Sin (2.0*Pi*F*I)/44100.0}/2.0|{NoteToSamples F A I+1.0}
@@ -227,9 +227,9 @@ local
 	 case Elem of silence(duration:D) then
 	    {Append {NoteToSamples 0 44100.0*D 1.0} {PartitionToSamples T}}
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
-	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 1.0} {PartitionToSamples T}}
+	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
 	 [] H|Tail then
-	    {Append {ChordToSamples {Frequency Elem} 44100.0*H.duration 1.0 0.0} {PartitionToSamples T}}
+	    {Append {ChordToSamples {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
 	 end
       else
 	 nil
@@ -239,10 +239,14 @@ local
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
    fun {Mix P2T Music}
-      % TODO
-      {Project.readFile 'wave/animaux/cow.wav'}
+      case Music of Elem|T then
+	 case Elem of partition(Partition) then
+	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}
+	 else
+	    {Mix PartitionToTimedList T}
+	 end
+      end
    end
-
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    Music = {Project.load 'joy.dj.oz'}
