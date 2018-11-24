@@ -242,7 +242,7 @@ local
       if Amount == 1 then
 	 Music
       else
-	 {Append Music {Repeat Amount-1 Music}}
+	 {Append Music {Repeat Amount-1 Music}} %Je pense qu'il faut mettre le premier Music en []
       end
    end
 
@@ -273,6 +273,14 @@ local
       end
    in
       {CutAux Start Stop 0.0 Music}
+   end
+   
+   fun {Reverse Music}
+      case Music of H|T then
+         {Append {Reverse T} [H]}
+      else
+         nil
+      end
    end
    
    
