@@ -283,6 +283,57 @@ local
       end
    end
    
+   fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
+      case List of H|T then
+         case H of Inten#Mus then
+	    {ParseMusic T {Append Acc1 [Inten]} {Append Acc2 [Mus]}}
+         else
+	    {ParseMusic T Acc1 Acc2}
+         end
+      else
+         [Acc1 Acc2]
+      end
+   end
+   
+   fun {Merger IntenList MusList Acc} %Adds multiplies the List of samples MusList with IntenList then adds them into Acc
+      case MusList of H|T then
+         case IntenList of IntenH|IntenT then
+	    {Merger T IntenT Acc+H*IntenH}
+         else
+	    {Merger T IntenList Acc} %Normally, if the formatting is correct, this will never be used
+         end
+      else
+         Acc
+      end
+   end
+   
+   fun {Merge IntenList MusList}
+      fun {CollectMus MusList Acc1 Acc2}%Splits the first elements from the lists and puts them into Acc1, Acc2 is a list of the tails (nils are replaced with 0.0)
+         case MusList of H|T then
+	    case H of Head|Tail then
+	       if Tail == nil then
+	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [0.0]}}
+	       else
+	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [Tail]}}
+	       end
+	    else
+	       {CollectMus T {Append Acc1 [0.0]} {Append Acc2 [0.0]}}
+	    end
+         else
+	    [Acc1 Acc2]
+         end
+      end
+   in
+      local Temp in
+         Temp = {CollectMus MusList nil nil}
+         case MusList of H|T then
+	    {Merger IntenList {CollectMus MusList nil nil} 0.0}|{Merge IntenList Temp.2}
+         else
+	    nil
+         end
+      end
+   end
+   
    
 
    
@@ -291,6 +342,11 @@ local
       case Music of Elem|T then
 	 case Elem of partition(Partition) then
 	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
+	 [] merge(MusWInten)
+	    local Temp in
+	       Temp = {ParseMusic {MusWInten nil nil}
+	       {Append {Merge Temp.1 Temp.2} {Mix P2T T}}
+	    end
 	 [] repeat(amount:Amount Mus) then
 	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
 	 [] loop(duration:Duration Mus) then
