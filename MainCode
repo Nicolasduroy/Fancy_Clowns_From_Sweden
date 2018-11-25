@@ -248,7 +248,7 @@ local
 
    fun{Loop Duration Music}
       local Time Number Rest in
-	 Time = {List.Length Music}/44100
+	 Time = {List.length Music}/44100
 	 Number = Time div Duration
 	 Rest = Time mod Duration
 	 {Append {Repeat Number Music} {Cut 0 Rest Music}} %Si le duration est plus petit que la music, on a une boucle infinie. 
@@ -307,29 +307,34 @@ local
       end
    end
    
-   fun {Merge IntenList MusList}
-      fun {CollectMus MusList Acc1 Acc2}%Splits the first elements from the lists and puts them into Acc1, Acc2 is a list of the tails (nils are replaced with 0.0)
+   
+   fun {Merge IntenList MusList Counter}%Counter is used here to keep track of how many lists there are that have not ended
+      fun {CollectMus MusList Acc1 Acc2 Count}%Splits the first elements from the lists and puts them into Acc1, Acc2 is a list of the tails (nils are replaced with 0.0)
          case MusList of H|T then
 	    case H of Head|Tail then
 	       if Tail == nil then
-	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [0.0]}}
+	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [0.0]} Count-1}
 	       else
-	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [Tail]}}
+	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [Tail]} Count}
 	       end
 	    else
-	       {CollectMus T {Append Acc1 [0.0]} {Append Acc2 [0.0]}}
+	       {CollectMus T {Append Acc1 [0.0]} {Append Acc2 [0.0]} Count}
 	    end
          else
-	    [Acc1 Acc2]
+	    [Acc1 Acc2 Count]
          end
       end
    in
-      local Temp in
-         Temp = {CollectMus MusList nil nil}
-         case MusList of H|T then
-	    {Merger IntenList {CollectMus MusList nil nil} 0.0}|{Merge IntenList Temp.2}
-         else
-	    nil
+      if Counter == 0 then
+         nil
+      else
+         local Temp in
+	    Temp = {CollectMus MusList nil nil Counter}
+	    case MusList of H|T then
+	       {Merger IntenList Temp.1 0.0}|{Merge IntenList Temp.2.1 Temp.2.2.1}
+	    else
+	       nil
+	    end
          end
       end
    end
@@ -358,7 +363,7 @@ local
 	 [] merge(MusWInten)
 	    local Temp in
 	       Temp = {ParseMusic {MusWInten nil nil}}
-	       {Append {Merge Temp.1 {Mix P2T Temp.2}} {Mix P2T T}}
+	       {Append {Merge Temp.1 {Mix P2T Temp.2.1} {List.length MusWInten}} {Mix P2T T}}
 	    end
 	 [] reverse(Music)
 	    {Append {Reverse {Mix P2T Mus}} {Mix P2T T}}
