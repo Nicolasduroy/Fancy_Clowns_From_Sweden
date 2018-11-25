@@ -334,6 +334,18 @@ local
       end
    end
    
+   fun {Echo Duration Factor Music}
+      fun {EchoCreator Dur Music}
+         if Dur>0.0 then
+	    {EchoCreator Duration-1.0 0.0|Music}
+         else
+	    Music
+         end
+      end
+   in
+      {Merge [1.0#Music Factor#{EchoCreator Duration*44100.0 Music}]}
+   end
+   
    
 
    
@@ -344,8 +356,8 @@ local
 	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
 	 [] merge(MusWInten)
 	    local Temp in
-	       Temp = {ParseMusic {MusWInten nil nil}
-	       {Append {Merge Temp.1 Temp.2} {Mix P2T T}}
+	       Temp = {ParseMusic {MusWInten nil nil}}
+	       {Append {Merge Temp.1 {Mix P2T Temp.2}} {Mix P2T T}}
 	    end
 	 [] repeat(amount:Amount Mus) then
 	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
@@ -353,6 +365,8 @@ local
 	    {Append {Loop Duration {Mix P2T Mus}} {Mix P2T T}}
 	 [] cut(start:Start finish:Stop Mus) then
 	    {Append {Cut Start Stop {Mix P2T Mus}} {Mix P2T T}}
+	 [] echo(delay:Duration decay:Factor Mus)
+	    {Append {Echo Duration Factor {Mix P2T Mus}} {Mix P2T T}}
 	 else
 	    {Mix PartitionToTimedList T}
 	 end
