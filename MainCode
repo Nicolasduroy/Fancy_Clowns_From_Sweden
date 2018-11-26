@@ -194,6 +194,14 @@ local
       end
    end
    
+   fun {SilenceToSamples Duration Acc }
+      if Acc1 >= Duration then
+	 nil
+      else
+	 0|{SilenceToSamples Acc+1.0}
+      end
+   end
+   
    fun{NoteToSamples F A I}
       if I >= A then
 	 nil
@@ -225,7 +233,7 @@ local
    fun {PartitionToSamples Partition}
       case Partition of  Elem|T then
 	 case Elem of silence(duration:D) then
-	    {Append {NoteToSamples 0 44100.0*D 1.0} {PartitionToSamples T}} %Creer une fonction appart pour silence? Calcule non necessaire
+	    {Append {SilenceToSamples 44100.0*D 0.0} {PartitionToSamples T}} %Creer une fonction appart pour silence? Calcule non necessaire
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
 	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
 	 [] H|Tail then
@@ -242,7 +250,7 @@ local
       if Amount == 1 then
 	 Music
       else
-	 {Append Music {Repeat Amount-1 Music}} %Je pense qu'il faut mettre le premier Music en []
+	 {Append Music {Repeat Amount-1 Music}} %Je pense qu'il faut mettre le premier Music en [] ==> non Music est deja une liste
       end
    end
 
@@ -265,7 +273,7 @@ local
 		  H|{CutAux Start Stop Acc+1.0 T}
 	       end
 	    else
-	       0.0|{CutAux Start Stop Acc+1.0 nil} %Pourqoui zero?
+	       0.0|{CutAux Start Stop Acc+1.0 nil}
 	    end
 	 else
 	    nil
