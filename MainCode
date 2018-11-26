@@ -283,11 +283,11 @@ local
       {CutAux Start Stop 0.0 Music}
    end
    
-   fun {Reverse Music}
+   fun {Reverse Music Acc}
       case Music of H|T then
-         {Append {Reverse T} [H]}
+         {Reverse T H|Acc}
       else
-         nil
+         Acc
       end
    end
    
@@ -356,7 +356,7 @@ local
          end
       end
    in
-      {Merge [1.0#Music Factor#{EchoCreator Duration*44100.0 Music}]}
+      {Merge [1.0-Factor Factor] [Music {EchoCreator Duration*44100.0 Music}] 2}
    end
    
    
