@@ -396,12 +396,12 @@ local
       case Music of Elem|T then
 	 case Elem of partition(Partition) then
 	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
-	 [] merge(MusWInten)
+	 [] merge(MusWInten) then
 	    local Temp in
 	       Temp = {ParseMusic MusWInten nil nil}
 	       {Append {Merge Temp.1 {Mix P2T Temp.2.1} {List.length MusWInten}} {Mix P2T T}}
 	    end
-	 [] reverse(Mus)
+	 [] reverse(Mus) then
 	    {Append {Reverse {Mix P2T Mus} nil} {Mix P2T T}}
 	 [] repeat(amount:Amount Mus) then
 	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
@@ -409,7 +409,7 @@ local
 	    {Append {Loop Duration {Mix P2T Mus}} {Mix P2T T}}
 	 [] cut(start:Start finish:Stop Mus) then
 	    {Append {Cut Start Stop {Mix P2T Mus}} {Mix P2T T}}
-	 [] echo(delay:Duration decay:Factor Mus)
+	 [] echo(delay:Duration decay:Factor Mus) then
 	    {Append {Echo Duration Factor {Mix P2T Mus}} {Mix P2T T}}
 	 [] fade(start:DurIn out:DurOut Mus) then
 	    {Append {Fade DurIn DurOut {Mix P2T Mus}} {Mix P2T T}}
