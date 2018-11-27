@@ -194,11 +194,11 @@ local
       end
    end
    
-   fun {SilenceToSamples Duration Acc }
-      if Acc1 >= Duration then
+   fun {SilenceToSamples Duration Acc}
+      if Acc >= Duration then
 	 nil
       else
-	 0|{SilenceToSamples Acc+1.0}
+	 0|{SilenceToSamples Duration Acc+1.0}
       end
    end
    
@@ -398,10 +398,10 @@ local
 	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
 	 [] merge(MusWInten)
 	    local Temp in
-	       Temp = {ParseMusic {MusWInten nil nil}}
+	       Temp = {ParseMusic MusWInten nil nil}
 	       {Append {Merge Temp.1 {Mix P2T Temp.2.1} {List.length MusWInten}} {Mix P2T T}}
 	    end
-	 [] reverse(Music)
+	 [] reverse(Mus)
 	    {Append {Reverse {Mix P2T Mus} nil} {Mix P2T T}}
 	 [] repeat(amount:Amount Mus) then
 	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
@@ -411,7 +411,7 @@ local
 	    {Append {Cut Start Stop {Mix P2T Mus}} {Mix P2T T}}
 	 [] echo(delay:Duration decay:Factor Mus)
 	    {Append {Echo Duration Factor {Mix P2T Mus}} {Mix P2T T}}
-	 [] fade(in:DurIn out:DurOut Mus) then
+	 [] fade(start:DurIn out:DurOut Mus) then
 	    {Append {Fade DurIn DurOut {Mix P2T Mus}} {Mix P2T T}}
 	 else
 	    {Mix PartitionToTimedList T}
