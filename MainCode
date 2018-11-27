@@ -416,6 +416,8 @@ local
 	    {Append {Echo Duration Factor {Mix P2T Mus}} {Mix P2T T}}
 	 [] fade(start:DurIn out:DurOut Mus) then
 	    {Append {Fade DurIn DurOut {Mix P2T Mus}} {Mix P2T T}}
+	 [] wave(FileName) then
+	    {Append {Project.readFile} {Mix P2T T}}
 	 else
 	    {Mix PartitionToTimedList T}
 	 end
