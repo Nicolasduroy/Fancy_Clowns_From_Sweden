@@ -358,7 +358,7 @@ local
    in
       {Merge [1.0-Factor Factor] [Music {EchoCreator Duration*44100.0 Music}] 2}
    end
-   declare
+
    fun {Fade DurationIn DurationOut Mus}
       Length = {Int.toFloat {List.length Mus}}
       IntIn = DurationIn*44100.0
