@@ -122,8 +122,8 @@ local
 	      else
 	         CurrNum = O*12 + Notes.Name
 	      end
-	      case NumNotes.(CurrNum + Semitone mod 12) of N#B then
-	         note(name:N octave:(CurrNum + Semitone div 12) sharp:B duration:D instrument:I)|{Transpose Semitone T}
+	      case NumNotes.((CurrNum + Semitone) mod 12) of N#B then
+	         note(name:N octave:((CurrNum + Semitone) div 12) sharp:B duration:D instrument:I)|{Transpose Semitone T}
 	      else
 	        {Transpose Semitone T}
 	      end
@@ -144,15 +144,7 @@ local
    fun {PartitionToTimedList Partition}
       case Partition of Elem|T then
 	 case Elem of H|Tail then
-	    case H of Atom then
 	       {ChordToExtended Elem}|{PartitionToTimedList T}
-	    [] Name#Octave then
-	       {ChordToExtended Elem}|{PartitionToTimedList T}
-	    else
-	       Elem|{PartitionToTimedList T}
-	    end
-	 [] Name#Octave then
-	    {NoteToExtended Elem}|{PartitionToTimedList T}
 	 [] silence(duration:D) then
 	    Elem|{PartitionToTimedList T}
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
