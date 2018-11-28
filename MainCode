@@ -417,7 +417,7 @@ local
 	 [] Samples then
 	    Samples|{Mix P2T T}
 	 else
-	    {Mix P2T}
+	    {Mix P2T T}
 	 end
       else
 	 nil
