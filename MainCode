@@ -410,6 +410,8 @@ local
 	    {Append {Fade DurIn DurOut {Mix P2T Mus}} {Mix P2T T}}
 	 [] wave(FileName) then
 	    {Append {Project.readFile} {Mix P2T T}}
+	 [] Samples then
+	    Samples|{Mix P2T T}
 	 else
 	    {Mix PartitionToTimedList T}
 	 end
