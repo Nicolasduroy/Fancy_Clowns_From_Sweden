@@ -1,17 +1,12 @@
-local
-   % See project statement for API details.
-   [Project] = {Link ['Project2018.ozf']}
-   Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
    % Translate a note to the extended notation.
    fun {NoteToExtended Note}
       case Note
       of Name#Octave then
          note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
       [] silence then
-         silence(duration:1.0)
+	 silence(duration:1.0)
+      [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	 Note
       [] Atom then
          case {AtomToString Atom}
          of [_] then
@@ -96,7 +91,7 @@ local
 	 {Stretch FixedDuration/D Partition}
       else
 	 Partition
-      end
+      end 
    end
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -108,7 +103,7 @@ local
       end
    end
 
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   fun {Transpose Semitone Partition}
      local Notes SharpNotes NumNotes CurrNum in
@@ -137,39 +132,59 @@ local
         end
      end
   end
-   
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  fun{DefInstrument Instrument Partition}
+     case Partition of Elem|T then
+	case Elem of note(name:N octave:O sharp:S duration:D instrument:none) then
+	   note(name:N octave:O sharp:S duration:D instrument:Instrument)|{DefInstrument Instrument T}
+	[] H|Tail then
+	   {DefInstrument Instrument H}|{DefInstrument Instrument T}
+	else
+	   Elem|{DefInstrument Instrument T}
+	end
+     else
+	nil
+     end
+  end
+	   
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
-   fun {PartitionToTimedList Partition}
-      case Partition of Elem|T then
-	 case Elem of H|Tail then
-	       {ChordToExtended Elem}|{PartitionToTimedList T}
-	 [] silence(duration:D) then
-	    Elem|{PartitionToTimedList T}
-	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
-	    Elem|{PartitionToTimedList T}
-	 [] duration(seconds:Sec Part) then
-	    {Append {FixDuration Sec {PartitionToTimedList Part}} {PartitionToTimedList T}}
-	 [] stretch(factor:Factor Part) then
-	    {Append {Stretch Factor {PartitionToTimedList Part}} {PartitionToTimedList T}}
-	 [] drone(note:Sound amount:Amount)then
-	    case Sound of H|Tail then
-	       {Append {Drone {ChordToExtended Sound} Amount} {PartitionToTimedList T}}
-	    else
-	       {Append {Drone {NoteToExtended Sound}Amount} {PartitionToTimedList T}}
-	    end
-	 [] transpose(semitones:Semitones Part) then
-	    {Append {Transpose Semitones {PartitionToTimedList Part}} {PartitionToTimedList T}} 
-	 [] Atom then
-	     {NoteToExtended Elem}|{PartitionToTimedList T}
-	 else 
-	    Elem|{PartitionToTimedList T}
-	 end
-	 else
-	 nil
-      end
-   end
+  fun {PartitionToTimedList Partition}
+     case Partition of Elem|T then
+	case Elem of H|Tail then
+	   {ChordToExtended Elem}|{PartitionToTimedList T}
+	[] silence(duration:D) then
+	   Elem|{PartitionToTimedList T}
+	[] note(name:N octave:O sharp:S duration:D instrument:I) then
+	   Elem|{PartitionToTimedList T}
+	[] nil then
+	   {PartitionToTimedList T}
+	[] duration(seconds:Sec Part) then
+	   {Append {FixDuration Sec {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	[] stretch(factor:Factor Part) then
+	   {Append {Stretch Factor {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	[] drone(note:Sound amount:Amount)then
+	   case Sound of H|Tail then
+	      {Append {Drone {ChordToExtended Sound} Amount} {PartitionToTimedList T}}
+	   else
+	      {Append {Drone {NoteToExtended Sound}Amount} {PartitionToTimedList T}}
+	   end
+	[] transpose(semitones:Semitones Part) then
+	   {Append {Transpose Semitones {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	[] instrument(name:Instrument Part) then
+	   {Append {DefInstrument Instrument {PartitionToTimedList Part}} {PartitionToTimedList T}}
+	[] Atom then
+	    {NoteToExtended Elem}|{PartitionToTimedList T}
+	else 
+	   Elem|{PartitionToTimedList T}
+	end
+     else
+	nil
+     end
+  end
   
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
