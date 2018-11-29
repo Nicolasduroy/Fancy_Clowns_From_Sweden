@@ -309,12 +309,12 @@ local
    fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
       case List of H|T then
          case H of Inten#Mus then
-	    {ParseMusic T {Append Acc1 [Inten]} {Append Acc2 [Mus]}}
+	    {ParseMusic T Acc1|Inten Acc2|Mus}
          else
 	    {ParseMusic T Acc1 Acc2}
          end
       else
-         [Acc1 Acc2]
+         r(Acc1 Acc2)
       end
    end
    
@@ -393,7 +393,11 @@ local
 	    end
          else
 	    case Mus of H|T then
-	       Step*H|{Linearizer T Step-StepOut Count+1.0}
+	       if Count == Length-1.0 then
+		  0.0|{Linearizer T Step-StepOut Count+1.0} %Guarantee that the last frequency will be 0
+	       else
+		  Step*H|{Linearizer T Step-StepOut Count+1.0}
+	       end
 	    else
 	       nil
 	    end
@@ -402,7 +406,6 @@ local
    in
        {Linearizer Mus 0.0 0.0} 
    end
-   
    
 
    
@@ -414,7 +417,7 @@ local
 	 [] merge(MusWInten) then
 	    local Temp in
 	       Temp = {ParseMusic MusWInten nil nil}
-	       {Append {Merge Temp.1 {Mix P2T Temp.2.1} {List.length MusWInten}} {Mix P2T T}}
+	       {Append {Merge Temp.1 {Mix P2T Temp.2} {List.length MusWInten}} {Mix P2T T}}%NEED TO VERIFY THAT MIX CAN BE APPLIED ON LIST OF MUSICS
 	    end
 	 [] reverse(Mus) then
 	    {Append {Reverse {Mix P2T Mus} nil} {Mix P2T T}}
