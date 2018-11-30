@@ -309,7 +309,7 @@ local
    fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
       case List of H|T then
          case H of Inten#Mus then
-	    {ParseMusic T Acc1|Inten Acc2|Mus}
+	    {ParseMusic T Inten|Acc1 Mus|Acc2}
          else
 	    {ParseMusic T Acc1 Acc2}
          end
