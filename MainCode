@@ -336,15 +336,15 @@ local
          case MusList of H|T then
 	    case H of Head|Tail then
 	       if Tail == nil then
-	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [0.0]} Count-1}
+	          {CollectMus T Head|Acc1 0.0|Acc2 Count-1}
 	       else
-	          {CollectMus T {Append Acc1 [Head]} {Append Acc2 [Tail]} Count}
+	          {CollectMus T Head|Acc1 Tail|Acc2 Count}
 	       end
 	    else
-	       {CollectMus T {Append Acc1 [0.0]} {Append Acc2 [0.0]} Count}
+	       {CollectMus T 0.0|Acc1 0.0|Acc2 Count}
 	    end
          else
-	    [Acc1 Acc2 Count]
+	    r({List.reverse Acc1} {List.reverse Acc2} Count)
          end
       end
    in
@@ -354,7 +354,7 @@ local
          local Temp in
 	    Temp = {CollectMus MusList nil nil Counter}
 	    case MusList of H|T then
-	       {Merger IntenList Temp.1 0.0}|{Merge IntenList Temp.2.1 Temp.2.2.1}
+	       {Merger IntenList Temp.1 0.0}|{Merge IntenList Temp.2 Temp.3}
 	    else
 	       nil
 	    end
