@@ -364,7 +364,7 @@ local
    fun {Echo Duration Factor Music}
       fun {EchoCreator Dur Music}
          if Dur>0.0 then
-	    {EchoCreator Duration-1.0 0.0|Music}
+	    {EchoCreator Dur-1.0 0.0|Music}
          else
 	    Music
          end
@@ -419,7 +419,7 @@ local
 	       {Append {Merge Temp.1 {Mix P2T Temp.2} {List.length MusWInten}} {Mix P2T T}}%NEED TO VERIFY THAT MIX CAN BE APPLIED ON LIST OF MUSICS
 	    end
 	 [] reverse(Mus) then
-	    {Append {Reverse {Mix P2T Mus} nil} {Mix P2T T}}
+	    {Append {Reverse {Mix P2T Mus}} {Mix P2T T}}
 	 [] repeat(amount:Amount Mus) then
 	    {Append {Repeat Amount {Mix P2T Mus}} {Mix P2T T}}
 	 [] loop(duration:Duration Mus) then
