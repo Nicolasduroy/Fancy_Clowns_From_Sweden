@@ -270,19 +270,26 @@ local
    end
 
    fun{Loop Duration Music}
-      local Time Number Rest in
-	 Time = {List.length Music}/44100
-	 Number = Time div Duration
-	 Rest = Time mod Duration
-	 {Append {Repeat Number Music} {Cut 0 Rest Music}} %Si le duration est plus petit que la music, on a une boucle infinie. 
+      local Time Number in
+	 Time = {IntToFloat {List.length Music}}/44100.0
+	 Number = Duration/Time
+	 if (Number =< 1.0) then
+	    {Cut 0.0 Duration Music}
+	 else
+	    if (Number-{IntToFloat {FloatToInt Number}} =< 0.0) then
+	       {Append {Repeat {FloatToInt Number-1.0} Music} {Cut 0.0 (Duration-({IntToFloat {FloatToInt Number}-1})*Time) Music}}
+	    else
+	       {Append {Repeat {FloatToInt Number} Music} {Cut 0.0 (Duration-({IntToFloat {FloatToInt Number}}*Time)) Music}}
+	    end
+	 end
       end
    end
 
    fun{Cut Start Stop Music}
       fun {CutAux Start Stop Acc Music}
-	 if Acc =< Stop*44100.0 then
+	 if Acc =< (Stop*44100.0)-1.0 then
 	    case Music of H|T then
-	       if Acc =< Start*44100.0 then
+	       if Acc < Start*44100.0 then
 		  {CutAux Start Stop Acc+1.0 T}
 	       else
 		  H|{CutAux Start Stop Acc+1.0 T}
@@ -296,14 +303,6 @@ local
       end
    in
       {CutAux Start Stop 0.0 Music}
-   end
-   
-   fun {Reverse Music Acc}
-      case Music of H|T then
-         {Reverse T H|Acc}
-      else
-         Acc
-      end
    end
    
    fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
