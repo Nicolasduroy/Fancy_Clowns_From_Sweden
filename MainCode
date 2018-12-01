@@ -406,10 +406,13 @@ local
 	    end
          else
 	    case Mus of H|T then
-	       if Count == Length-1.0 then
-		  0.0|{Linearizer T Step-StepOut Count+1.0} %Guarantee that the last frequency will be 0
-	       else
-		  Step*H|{Linearizer T Step-StepOut Count+1.0}
+	       local Temp in
+		  Temp = Step*H
+		  if Temp<1.E~12 then
+		     0.0|{Linearizer T Step-StepOut Count+1.0} %Guarantee that the last frequency will be 0
+		  else
+		     Temp|{Linearizer T Step-StepOut Count+1.0}
+		  end
 	       end
 	    else
 	       nil
