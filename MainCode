@@ -420,7 +420,12 @@ local
          end
       end
    in
-       {Linearizer Mus 0.0 0.0} 
+      if DurationIn == 0.0 then
+         Length = {Int.toFloat {List.length Mus}}+1.0
+      else
+         Length = {Int.toFloat {List.length Mus}}
+      end
+      {Linearizer Mus 0.0 0.0} 
    end
    
 
