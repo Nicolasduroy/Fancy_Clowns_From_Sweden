@@ -225,6 +225,17 @@ local
       end
    end
 
+   fun{InstrumentedNote N O S D I}
+      local FileWay in
+	 if S then
+	    FileWay = {VirtualString.toAtom  'wave/instruments/'#(I#('_'#(N#('#'#(O#('.wav'))))))}
+	 else
+	    FileWay = {VirtualString.toAtom 'wave/instruments/'#(I#('_'#(N#(O#('.wav')))))}
+	 end
+	 {Loop D {Project.readFile FileWay}}
+      end
+   end
+
    fun {Frequency Elem}
       local Notes SharpNotes NumNotes CurrNum in
 	 Notes = notes(c:~9 d:~7 e:~5 f:~4 g:~2 a:0 b:2)
@@ -249,8 +260,10 @@ local
       case Partition of  Elem|T then
 	 case Elem of silence(duration:D) then
 	    {Append {SilenceToSamples 44100.0*D 0.0} {PartitionToSamples T}} %Creer une fonction appart pour silence? Calcule non necessaire
-	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	 [] note(name:N octave:O sharp:S duration:D instrument:none) then
 	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    {Append {InstrumentedNote N O S D I} {PartitionToSamples T}}
 	 [] H|Tail then
 	    {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
 	 end
@@ -258,7 +271,6 @@ local
 	 nil
       end
    end
-   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    fun{Repeat Amount Music}
