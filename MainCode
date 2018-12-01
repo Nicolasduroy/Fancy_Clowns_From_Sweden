@@ -414,9 +414,10 @@ local
 	 case Elem of partition(Partition) then
 	    {Append {PartitionToSamples {P2T Partition}} {Mix P2T T}}
 	 [] merge(MusWInten) then
-	    local Temp in
+	    local Temp MixBis in
+	       fun{MixBis Music} {Mix P2T Music} end
 	       Temp = {ParseMusic MusWInten nil nil}
-	       {Append {Merge Temp.1 {Mix P2T Temp.2} {List.length MusWInten}} {Mix P2T T}}%NEED TO VERIFY THAT MIX CAN BE APPLIED ON LIST OF MUSICS
+	       {Append {Merge Temp.1 {Map Temp.2 MixBis} {List.length MusWInten}} {Mix P2T T}}%Mix couldn't Map enables it
 	    end
 	 [] reverse(Mus) then
 	    {Append {Reverse {Mix P2T Mus}} {Mix P2T T}}
