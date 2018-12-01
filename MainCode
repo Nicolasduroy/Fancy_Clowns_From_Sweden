@@ -304,6 +304,20 @@ local
    in
       {CutAux Start Stop 0.0 Music}
    end
+
+   fun{Clip Low High Music}
+      case Music of H|T then
+	 if H < Low then
+	    Low|{Clip Low High T}
+	 elseif H > High then
+	    High|{Clip Low High T}
+	 else
+	    H|{Clip Low High T}
+	 end
+      else
+	 nil
+      end
+   end
    
    fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
       case List of H|T then
@@ -417,7 +431,7 @@ local
 	    local Temp MixBis in
 	       fun{MixBis Music} {Mix P2T Music} end
 	       Temp = {ParseMusic MusWInten nil nil}
-	       {Append {Merge Temp.1 {Map Temp.2 MixBis} {List.length MusWInten}} {Mix P2T T}}%Mix couldn't Map enables it
+	       {Append {Merge Temp.1 {Map Temp.2 MixBis} {List.length MusWInten}} {Mix P2T T}}
 	    end
 	 [] reverse(Mus) then
 	    {Append {Reverse {Mix P2T Mus}} {Mix P2T T}}
@@ -431,6 +445,8 @@ local
 	    {Append {Echo Duration Factor {Mix P2T Mus}} {Mix P2T T}}
 	 [] fade(start:DurIn out:DurOut Mus) then
 	    {Append {Fade DurIn DurOut {Mix P2T Mus}} {Mix P2T T}}
+	 [] clip(low:Low high:High Mus) then
+	    {Append {Clip Low High {Mix P2T Mus}} {Mix P2T T}}
 	 [] wave(FileName) then
 	    {Append {Project.readFile} {Mix P2T T}}
 	 [] samples(Samples) then
@@ -446,7 +462,7 @@ local
 	 nil
       end
    end
-
+   
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    Music = {Project.load 'TestsCode.dj.oz'}
