@@ -274,15 +274,15 @@ local
    fun{Sum Samples1 Samples2}
       case Samples1 of H1|T1 then
 	 case Samples2 of  H2|T2 then
-	    H1+H2|{Add2 T1 T2}
+	    H1+H2|{Sum T1 T2}
 	 [] tail then
 	    Samples1
 	 else
-	    H1|{Add2 T1 nil}
+	    H1|{Sum T1 nil}
 	 end
       else
 	 case Music2 of H2|T2 then
-	    H2|{Add2 nil T2}
+	    H2|{Sum nil T2}
 	 else
 	    nil
 	 end
