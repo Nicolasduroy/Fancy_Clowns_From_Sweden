@@ -227,6 +227,7 @@ local
       end
    end
 
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    fun{InstrumentedNote N O S D I}
       local FileWay in
 	 if S then
@@ -238,6 +239,58 @@ local
       end
    end
 
+   fun{HasInstrument Chord}
+      case Chord of H|T then
+	 case H of silence(duration:D) then
+	    {HasInstrument T}
+	 [] note(name:N octave:O sharp:S duration:D instrument:none) then
+	    {HasInstrument T}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    true
+	 else
+	    {HasInstrument T}
+	 end
+      else
+	 false
+      end
+   end
+
+   fun{InstrumentedChord Chord}
+      case Chord of H|T then
+	 case H of silence(duration:D) then
+	    {Sum {SilenceToSamples D*44100.0 0.0} {InstrumentedChord T}}
+	 [] note(name:N octave:O sharp:S duration:D instrment:none) then
+	    {Sum {NoteToSamples {Frequency H} D*44100.0 0.0} {InstrumentedChord T}}
+	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
+	    {Sum {InstrumentedNote N O S D I} {InstrumentedChord T}}
+	 else
+	    {InstrumentedChord T}
+	 end
+      else
+	 tail
+      end
+   end
+
+   fun{Sum Samples1 Samples2}
+      case Samples1 of H1|T1 then
+	 case Samples2 of  H2|T2 then
+	    H1+H2|{Add2 T1 T2}
+	 [] tail then
+	    Samples1
+	 else
+	    H1|{Add2 T1 nil}
+	 end
+      else
+	 case Music2 of H2|T2 then
+	    H2|{Add2 nil T2}
+	 else
+	    nil
+	 end
+      end
+   end
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	    
    fun {Frequency Elem}
       local Notes SharpNotes NumNotes CurrNum in
 	 Notes = notes(c:~9 d:~7 e:~5 f:~4 g:~2 a:0 b:2)
@@ -267,7 +320,11 @@ local
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
 	    {Append {InstrumentedNote N O S D I} {PartitionToSamples T}}
 	 [] H|Tail then
-	    {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
+	    if {Not {HasInstrumentvElem}} then
+	       {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
+	    else
+	       {Append {InstrumentedChord Elem} {PartitionToSamples T}}
+	    end
 	 end
       else
 	 nil
@@ -496,7 +553,7 @@ local
 	    {Append {Project.readFile} {Mix P2T T}}
 	 [] samples(Samples) then
 	    {Append Samples {Mix P2T T}}
-	 [] crossfade(seconds:Dur Mus1 Mus2)
+	 [] crossfade(seconds:Dur Mus1 Mus2) then
 	    {Append {CrossFade Dur {Mix P2T Mus1} {Mix P2T Mus2}} {Mix P2T T}} 
 	 [] nil then
 	    {Mix P2T T}
