@@ -438,7 +438,7 @@ local
          end
       end
    in
-      {Merge [1.0-Factor Factor] [Music {EchoCreator Duration*44100.0 Music}]}
+      {Merge [1.0 Factor] [Music {EchoCreator Duration*44100.0 Music}]}
    end
 
    fun {Fade DurationIn DurationOut Mus}
@@ -448,63 +448,28 @@ local
       StepIn = 1.0/IntIn
       StepOut = 1.0/IntOut
       fun {Linearizer Mus Step Count}
-         if Count < Length-IntOut-1.0 then
+         if Count < Length-IntOut then
 	    case Mus of H|T then
 	       if Count < IntIn then
-	          H*Step|{Linearizer T Step+StepIn Count+1.0}
+		  H*Step|{Linearizer T Step+StepIn Count+1.0}
 	       else
-	          H|{Linearizer T 1.0 Count+1.0}
+	          H|{Linearizer T 1.0-StepOut Count+1.0}
 	       end
 	    else
 	       nil %If specification is respected, this will never be executed
 	    end
-         else
+	 else  
 	    case Mus of H|T then
-	       local Temp in
-		  Temp = Step*H
-		  if Temp<1.E~12 then
-		     0.0|{Linearizer T Step-StepOut Count+1.0} %Guarantee that the last frequency will be 0
-		  else
-		     Temp|{Linearizer T Step-StepOut Count+1.0}
-		  end
-	       end
+	       H*Step|{Linearizer T Step-StepOut Count+1.0}
 	    else
 	       nil
 	    end
          end
       end
    in
-      if DurationIn == 0.0 then
-         Length = {Int.toFloat {List.length Mus}}+1.0
-      else
-         Length = {Int.toFloat {List.length Mus}}
-      end
       {Linearizer Mus 0.0 0.0} 
    end
-   
-   fun {CrossFade Dur Mus1 Mus2}
-      Duration = Dur*44100.0
-      fun {Parse Mus Dura Acc}
-         case Mus of H|T then
-	    if Dura =< 0.0 then
-	       r({List.reverse Acc} Mus)
-	    else
-	       {Parse T Dura-1.0 H|Acc}
-	    end
-         else
-	    r({List.reverse Acc} Mus)%if the specifications are respected this line will not be executed
-         end
-      end
-   in
-      local F S L Temp in
-         F={Parse Mus1 {Int.toFloat {List.length Mus1}}-Duration-1.0 nil} %Given the specifications of Fade, we need to extract more samples than necessary
-         S={Parse Mus2 Duration+1.0 nil}%idem as the commentary above
-         Temp = {Fade 0.0 Dur F.2}
-         L={Merge [1.0 1.0] [Temp.2 {Fade Dur 0.0 S.1}]} 
-         {Append {Append F.1 {Append [Temp.1] L}} S.2} %Regrouping Everything
-      end
-   end
-   
+  
 
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -536,8 +501,6 @@ local
 	    {Append {Project.readFile} {Mix P2T T}}
 	 [] samples(Samples) then
 	    {Append Samples {Mix P2T T}}
-	 [] crossfade(seconds:Dur Mus1 Mus2) then
-	    {Append {CrossFade Dur {Mix P2T Mus1} {Mix P2T Mus2}} {Mix P2T T}} 
 	 [] nil then
 	    {Mix P2T T}
 	 [] Samples then
