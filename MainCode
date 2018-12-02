@@ -390,7 +390,7 @@ local
       end
    end
    
-   fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns [Intensities Music]
+   fun {ParseMusic List Acc1 Acc2} %Parses Intensities and Music. Returns r(1:Intensities 2:Music)
       case List of H|T then
          case H of Inten#Mus then
 	    {ParseMusic T Inten|Acc1 Mus|Acc2}
@@ -402,49 +402,32 @@ local
       end
    end
    
-   fun {Merger IntenList MusList Acc} %Adds multiplies the List of samples MusList with IntenList then adds them into Acc
+   
+   fun {Merger Mus1 Mus2}
+      case Mus1 of H1|T1 then
+         case Mus2 of H2|T2 then
+	    H1+H2|{Merger T1 T2}
+         else
+	    Mus1
+         end
+      else
+         Mus2
+      end
+   end
+
+   
+   fun {Merge IntentList MusList}
       case MusList of H|T then
-         case IntenList of IntenH|IntenT then
-	    {Merger T IntenT Acc+H*IntenH}
-         else
-	    {Merger T IntenList Acc} %Normally, if the formatting is correct, this will never be used
-         end
+	 case IntentList of HI|TI then
+	    {Merger {Map H fun{$ Sample} Sample*HI end} {ApplyInten TI T}}
+	 else
+	    nil
+	 end
       else
-         Acc
+	 nil
       end
    end
    
-   
-   fun {Merge IntenList MusList Counter}%Counter is used here to keep track of how many lists there are that have not ended
-      fun {CollectMus MusList Acc1 Acc2 Count}%Splits the first elements from the lists and puts them into Acc1, Acc2 is a list of the tails (nils are replaced with 0.0)
-         case MusList of H|T then
-	    case H of Head|Tail then
-	       if Tail == nil then
-	          {CollectMus T Head|Acc1 0.0|Acc2 Count-1}
-	       else
-	          {CollectMus T Head|Acc1 Tail|Acc2 Count}
-	       end
-	    else
-	       {CollectMus T 0.0|Acc1 0.0|Acc2 Count}
-	    end
-         else
-	    r({List.reverse Acc1} {List.reverse Acc2} Count)
-         end
-      end
-   in
-      if Counter == 0 then
-         nil
-      else
-         local Temp in
-	    Temp = {CollectMus MusList nil nil Counter}
-	    case MusList of H|T then
-	       {Merger IntenList Temp.1 0.0}|{Merge IntenList Temp.2 Temp.3}
-	    else
-	       nil
-	    end
-         end
-      end
-   end
    
    fun {Echo Duration Factor Music}
       fun {EchoCreator Dur Music}
@@ -455,7 +438,7 @@ local
          end
       end
    in
-      {Merge [1.0-Factor Factor] [Music {EchoCreator Duration*44100.0 Music}] 2}
+      {Merge [1.0-Factor Factor] [Music {EchoCreator Duration*44100.0 Music}]}
    end
 
    fun {Fade DurationIn DurationOut Mus}
@@ -517,7 +500,7 @@ local
          F={Parse Mus1 {Int.toFloat {List.length Mus1}}-Duration-1.0 nil} %Given the specifications of Fade, we need to extract more samples than necessary
          S={Parse Mus2 Duration+1.0 nil}%idem as the commentary above
          Temp = {Fade 0.0 Dur F.2}
-         L={Merge [1.0 1.0] [Temp.2 {Fade Dur 0.0 S.1}] 2} 
+         L={Merge [1.0 1.0] [Temp.2 {Fade Dur 0.0 S.1}]} 
          {Append {Append F.1 {Append [Temp.1] L}} S.2} %Regrouping Everything
       end
    end
@@ -532,8 +515,8 @@ local
 	 [] merge(MusWInten) then
 	    local Temp MixBis in
 	       fun{MixBis Music} {Mix P2T Music} end
-	       Temp = {ParseMusic MusWInten nil nil}
-	       {Append {Merge Temp.1 {Map Temp.2 MixBis} {List.length MusWInten}} {Mix P2T T}}
+	       Temp = {ParseMusic MusWInten nil nil} %Parses Intensities and Music. Returns r(1:Intensities 2:Music)
+	       {Append {Merge Temp.1 {Map Temp.2 MixBis}} {Mix P2T T}}
 	    end
 	 [] reverse(Mus) then
 	    {Append {Reverse {Mix P2T Mus}} {Mix P2T T}}
