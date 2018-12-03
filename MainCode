@@ -215,7 +215,7 @@ local
       if Acc >= Duration then
 	 nil
       else
-	 0|{SilenceToSamples Duration Acc+1.0}
+	 0.0|{SilenceToSamples Duration Acc+1.0}
       end
    end
    
