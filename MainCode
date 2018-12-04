@@ -4,6 +4,7 @@ local
    % See project statement for API details.
    [Project] = {Link ['Project2018.ozf']}
    Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
+   Extension = false
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % Translate a note to the extended notation.
    fun {NoteToExtended Note}
@@ -314,16 +315,32 @@ local
    fun {PartitionToSamples Partition}
       case Partition of  Elem|T then
 	 case Elem of silence(duration:D) then
-	    {Append {SilenceToSamples 44100.0*D 0.0} {PartitionToSamples T}} %Creer une fonction appart pour silence? Calcule non necessaire
+	    {Append {SilenceToSamples 44100.0*D 0.0} {PartitionToSamples T}}
 	 [] note(name:N octave:O sharp:S duration:D instrument:none) then
-	    {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
+	    if Extension then
+	       {Append {Fade D/10.0 D/10.0 {NoteToSamples {Frequency Elem} 44100.0*D 0.0}} {PartitionToSamples T}}
+	    else
+	       {Append {NoteToSamples {Frequency Elem} 44100.0*D 0.0} {PartitionToSamples T}}
+	    end
 	 [] note(name:N octave:O sharp:S duration:D instrument:I) then
-	    {Append {InstrumentedNote N O S D I} {PartitionToSamples T}}
+	    if Extension then
+	       {Append {Fade D/10.0 D/10.0 {InstrumentedNote N O S D I}} {PartitionToSamples T}}
+	    else
+	       {Append {InstrumentedNote N O S D I} {PartitionToSamples T}}
+	    end
 	 [] H|Tail then
 	    if {Not {HasInstrument Elem}} then
-	       {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
+	       if Extension then
+	          {Append {Fade D/10.0 D/10.0 {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0}} {PartitionToSamples T}}
+	       else
+	          {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
+	       end
 	    else
-	       {Append {InstrumentedChord Elem} {PartitionToSamples T}}
+	       if Extension then
+		  {Append {Fade D/10.0 D/10.0 {InstrumentedChord Elem}} {PartitionToSamples T}}
+	       else
+	          {Append {InstrumentedChord Elem} {PartitionToSamples T}}
+	       end
 	    end
 	 end
       else
