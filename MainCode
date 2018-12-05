@@ -515,7 +515,7 @@ local
 	 [] clip(low:Low high:High Mus) then
 	    {Append {Clip Low High {Mix P2T Mus}} {Mix P2T T}}
 	 [] wave(FileName) then
-	    {Append {Project.readFile} {Mix P2T T}}
+	    {Append {Project.readFile FileName} {Mix P2T T}}
 	 [] samples(Samples) then
 	    {Append Samples {Mix P2T T}}
 	 [] nil then
