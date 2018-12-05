@@ -331,13 +331,13 @@ local
 	 [] H|Tail then
 	    if {Not {HasInstrument Elem}} then
 	       if Extension then
-	          {Append {Fade D/10.0 D/10.0 {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0}} {PartitionToSamples T}}
+	          {Append {Fade (H.duration)/10.0 (H.duration)/10.0 {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0}} {PartitionToSamples T}}
 	       else
 	          {Append {ChordToSamples {Frequency Elem} {Frequency Elem} 44100.0*H.duration 0.0 0.0} {PartitionToSamples T}}
 	       end
 	    else
 	       if Extension then
-		  {Append {Fade D/10.0 D/10.0 {InstrumentedChord Elem}} {PartitionToSamples T}}
+		  {Append {Fade (H.duration)/10.0 (H.duration)/10.0 {InstrumentedChord Elem}} {PartitionToSamples T}}
 	       else
 	          {Append {InstrumentedChord Elem} {PartitionToSamples T}}
 	       end
